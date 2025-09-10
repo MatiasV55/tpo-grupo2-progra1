@@ -32,14 +32,14 @@ def main():
                 if not available:
                     print("No hay libros disponibles.")
                 for b in available:
-                    print(f"ID: {b[0]} | {b[1]} - {b[2]}")
+                    print(f"{b[1]} - {b[2]}")
 
             elif option == "4":
                 lent = f.list_books(status="prestado")
                 if not lent:
                     print("No hay libros prestados.")
                 for b in lent:
-                    print(f"ID: {b[0]} | {b[1]} - Prestado a {b[4][1]}")
+                    print(f"{b[1]} - Prestado a {b[4][1]}")
 
             elif option == "0":
                 print("Saliendo del sistema...")

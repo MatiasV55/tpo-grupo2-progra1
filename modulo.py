@@ -50,8 +50,8 @@ def list_books(status="disponible"):
         list: Lista de libros disponibles o prestados.
     """
     if status == "disponible":
-        return [b for b in books if b[3]]
+        return [b[:5] for b in books if b[3]]
     elif status == "prestado":
-        return [b for b in books if not b[3]]
+        return [b[:5] for b in books if not b[3]]
     else:
         return []
