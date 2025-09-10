@@ -6,6 +6,7 @@ def show_menu():
     print("2. Registrar usuario")
     print("3. Listar libros disponibles")
     print("4. Listar libros prestados")
+    print("5. Obtener usuarios penalizados")
     print("0. Salir")
     
 def main():
@@ -40,6 +41,20 @@ def main():
                     print("No hay libros prestados.")
                 for b in lent:
                     print(f"{b[1]} - Prestado a {b[4][1]}")
+            elif option == "5":
+                users = f.get_users()
+                if not users:
+                    print("No hay usuarios penalizados.")
+                else:
+                    penalizados = list(filter(lambda x: x[2] >= 3 and x[3] is not None, users))
+                    
+                    if not penalizados:
+                        print("No hay usuarios penalizados.")
+                    else:
+                        print("Usuarios penalizados:")
+                        for user in penalizados:
+                            print(user)
+
 
             elif option == "0":
                 print("Saliendo del sistema...")

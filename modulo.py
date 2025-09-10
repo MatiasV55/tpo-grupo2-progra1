@@ -10,6 +10,7 @@ books = [
 users = [
     [1, "Ana", 0, None],
     [2, "Carlos", 2, None],
+    [3, "Juan", 3, "2025-11-11"]
 ]
 
 def register_book(title, author):
@@ -55,3 +56,6 @@ def list_books(status="disponible"):
         return [b[:5] for b in books if not b[3]]
     else:
         return []
+    
+def get_users():
+    return users
