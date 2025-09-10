@@ -28,4 +28,4 @@ Esto ayuda a mantener un inventario organizado y mejorar la experiencia de los u
 Para correr la versión actual del sistema:  
 
 ```bash
-python3 main.py
+python main.py
