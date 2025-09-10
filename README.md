@@ -10,7 +10,8 @@ Permite registrar, consultar y administrar el estado de los ejemplares de manera
 - Josias Paredes  
 - Cristian Kosten  
 - Julian Laterza  
-- Ignacio Rojas  
+- Ignacio Rojas
+- Misael Tevez 
 
 ---
 
@@ -18,7 +19,6 @@ Permite registrar, consultar y administrar el estado de los ejemplares de manera
 El objetivo principal de **PySGB** es ofrecer un sistema práctico para bibliotecas, permitiendo controlar los estados de los libros:  
 - 📗 **Disponible**  
 - 📕 **Prestado**  
-- 📙 **Perdido**  
 
 Esto ayuda a mantener un inventario organizado y mejorar la experiencia de los usuarios.  
 
