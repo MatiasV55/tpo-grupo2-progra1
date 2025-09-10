@@ -1,4 +1,4 @@
-import functions as f
+import modulo as f
 
 def show_menu():
     print("\n--- Sistema de Gestión de Biblioteca (PySGB) ---")
