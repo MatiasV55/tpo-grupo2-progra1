@@ -22,18 +22,20 @@ def main():
 
             elif option == "2":
                 name = input("Nombre del usuario: ")
+                if any(chr.isdigit() for chr in name):
+                    raise ValueError("El nombre no puede contener números.")
                 result = f.register_user(name)
                 print(f"Se ha registrado el usuario '{name}' con el ID {result}")
 
             elif option == "3":
-                available = f.list_available_books()
+                available = f.list_books()
                 if not available:
                     print("No hay libros disponibles.")
                 for b in available:
                     print(f"ID: {b[0]} | {b[1]} - {b[2]}")
 
             elif option == "4":
-                lent = f.list_lent_books()
+                lent = f.list_books(status="prestado")
                 if not lent:
                     print("No hay libros prestados.")
                 for b in lent:

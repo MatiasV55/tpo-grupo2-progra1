@@ -42,21 +42,16 @@ def register_user(name):
     users.append([new_id, name, 0, None])
     return new_id
 
-def list_available_books():
+def list_books(status="disponible"):
     """
-    Lista de libros disponibles.
+    Lista de libros disponibles o prestados.
 
     Returns:
-        list: Lista de libros disponibles.
+        list: Lista de libros disponibles o prestados.
     """
-    return [b for b in books if b[3]]
-
-
-def list_lent_books():
-    """
-    Lista de libros prestados.
-
-    Returns:
-        list: Lista de libros prestados.
-    """
-    return [b for b in books if not b[3]]
+    if status == "disponible":
+        return [b for b in books if b[3]]
+    elif status == "prestado":
+        return [b for b in books if not b[3]]
+    else:
+        return []
