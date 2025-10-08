@@ -1,3 +1,6 @@
+# TODO: main_user.py Gestion de usuarios, login, el usuario puede solicitar prestamo, cambia pass
+# TODO: Busqueda de libro por nombre, logs. 
+
 import modulo as f
 
 # ----------------- DATOS MOCK -----------------
@@ -61,7 +64,7 @@ def main():
                 if not users_list:
                     print("No hay usuarios penalizados.")
                 else:
-                    penalizados = list(filter(lambda x: x[2] >= 3 and x[3] is not None, users_list))
+                    penalizados = list(filter(lambda x: int(x[2]) >= 3 and x[3] is not None, users))
                     
                     if not penalizados:
                         print("No hay usuarios penalizados.")
