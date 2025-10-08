@@ -1,23 +1,9 @@
-# ----------------- DATOS MOCK -----------------
-# books: [[id, nombre, autor, disponible, usuario, fecha de devolucion]]
-books = [
-    [1, "Cien Años de Soledad", "Gabriel García Márquez", True, None, None],
-    [2, "Los Miserables", "Victor Hugo", True, None, None],
-    [3, "Rayuela", "Julio Cortazar", False, [1, "Ana", 0, None], "2025-12-05"],
-]
-
-# users: [id, nombre, strikes, fecha hasta la cual estara bloqueado]
-users = [
-    [1, "Ana", 0, None],
-    [2, "Carlos", 2, None],
-    [3, "Juan", 3, "2025-11-11"]
-]
-
-def register_book(title, author):
+def register_book(books, title, author):
     """
     Registra un nuevo libro.
 
     Args:
+        books (list): Lista de libros existentes.
         title (str): Título del libro.
         author (str): Autor del libro.
 
@@ -29,11 +15,12 @@ def register_book(title, author):
     return new_id
 
 
-def register_user(name):
+def register_user(users, name):
     """
     Registra un nuevo usuario.
 
     Args:
+        users (list): Lista de usuarios existentes.
         name (str): Nombre del usuario.
 
     Returns:
@@ -43,9 +30,13 @@ def register_user(name):
     users.append([new_id, name, 0, None])
     return new_id
 
-def list_books(status="disponible"):
+def list_books(books, status="disponible"):
     """
     Lista de libros disponibles o prestados.
+
+    Args:
+        books (list): Lista de libros existentes.
+        status (str): Estado de los libros a listar ("disponible" o "prestado").
 
     Returns:
         list: Lista de libros disponibles o prestados.
@@ -57,5 +48,14 @@ def list_books(status="disponible"):
     else:
         return []
     
-def get_users():
+def get_users(users):
+    """
+    Obtiene la lista de usuarios.
+
+    Args:
+        users (list): Lista de usuarios existentes.
+
+    Returns:
+        list: Lista de usuarios.
+    """
     return users
