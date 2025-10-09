@@ -1,5 +1,3 @@
 id,title,author,available,user_id,return
-1,Cien años de soledad,Gabriel Garcia Marquez,True
-2,Los Miserables,Victor Hugo,True
-3,Rayuela,Julio Cortazar,False,1,2025-11-114
-4,Harry Potter,JK Rowling,True,,
+1,Rayuela,Julio Cortazar,False,1,2025-11-11
+2,Harry Potter,JK Rownling,False,1,2025-11-11

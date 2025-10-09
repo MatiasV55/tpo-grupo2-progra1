@@ -15,7 +15,7 @@ def register_book(title, author, books_file="books.csv"):
     """
     books = get_books()
     new_id = max([int(b[0]) for b in books], default=0) + 1
-    new_book = [new_id, title, author, True, None, None]
+    new_book = [new_id, title, author, True, '', '']
     with open(books_file, 'a', newline='\n', encoding='utf-8') as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerow(new_book)
@@ -36,7 +36,7 @@ def register_user(name, users_file="users.csv"):
     """
     users = get_users()
     new_id = max([int(u[0]) for u in users], default=0) + 1
-    new_user = [new_id, name, 0, None]
+    new_user = [new_id, name, 0, '']
     with open(users_file, 'a', newline='\n', encoding='utf-8') as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerow(new_user)
@@ -87,7 +87,6 @@ def list_books(status="disponible"):
     Lista de libros disponibles o prestados.
 
     Args:
-        books (list): Lista de libros existentes.
         status (str): Estado de los libros a listar ("disponible" o "prestado").
 
     Returns:
@@ -95,8 +94,8 @@ def list_books(status="disponible"):
     """
     books = get_books()
     if status == "disponible":
-        return [b[:5] for b in books if b[3]]
+        return [b for b in books if b[3] == 'True']
     elif status == "prestado":
-        return [b[:5] for b in books if not b[3]]
+        return [b for b in books if b[3] == 'False']
     else:
         return []
