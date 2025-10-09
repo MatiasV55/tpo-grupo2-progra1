@@ -5,7 +5,6 @@ def register_book(title, author, books_file="books.csv"):
     Registra un nuevo libro.
 
     Args:
-        books (list): Lista de libros existentes.
         title (str): Título del libro.
         author (str): Autor del libro.
         books_file (str): Path al archivo para persistencia.
@@ -28,7 +27,8 @@ def register_user(name, users_file="users.csv"):
     Registra un nuevo usuario.
 
     Args:
-        name (str): Nombre del usuario.        
+        name (str): Nombre del usuario.
+        users_file (str): Ruta al archivo para persistencia.
         users_file (str): Ruta al archivo para persistencia.
 
     Returns:
@@ -60,11 +60,11 @@ def read_file(filename):
         for row in csvreader:
             all_rows.append(row)
     csvfile.close()
-    return all_rows   
+    return all_rows
     
 def get_books():
     """
-    Lee un archivo csv y retorna los libros .
+    Lee un archivo csv y retorna los libros.
 
     Returns:
         list: Todos los libros registrados.
@@ -94,8 +94,8 @@ def list_books(status="disponible"):
     """
     books = get_books()
     if status == "disponible":
-        return [b for b in books if b[3] == 'True']
+        return [book for book in books if book[3] == 'True']
     elif status == "prestado":
-        return [b for b in books if b[3] == 'False']
+        return [book for book in books if book[3] == 'False']
     else:
         return []

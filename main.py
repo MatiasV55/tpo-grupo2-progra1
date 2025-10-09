@@ -26,7 +26,7 @@ def main():
 
             elif option == "2":
                 name = input("Nombre del usuario: ")
-                if any(chr.isdigit() for chr in name):
+                if any(char.isdigit() for char in name):
                     raise ValueError("El nombre no puede contener números.")
                 result = f.register_user(name)
                 print(f"Se ha registrado el usuario '{name}' con el ID {result}")
@@ -35,21 +35,23 @@ def main():
                 available = f.list_books()
                 if not available:
                     print("No hay libros disponibles.")
-                for b in available:
-                    print(f"{b[1]} - {b[2]}")
+                for book in available:
+                    print(f"{book[1]} - {book[2]}")
 
             elif option == "4":
                 lent = f.list_books(status="prestado")
                 if not lent:
                     print("No hay libros prestados.")
-                for b in lent:
-                    print(b)
+                for book in lent:
+                    print(book)
             elif option == "5":
                 users_list = f.get_users()
                 if not users_list:
                     print("No hay usuarios penalizados.")
                 else:
-                    penalizados = list(filter(lambda x: int(x[2]) >= 3 and x[3] is not None, users_list))
+                    penalizados = list(filter(
+                        lambda user: int(user[2]) >= 3 and user[3] is not None,
+                        users_list))
                     
                     if not penalizados:
                         print("No hay usuarios penalizados.")
@@ -57,7 +59,6 @@ def main():
                         print("Usuarios penalizados:")
                         for user in penalizados:
                             print(user)
-
 
             elif option == "0":
                 print("Saliendo del sistema...")
