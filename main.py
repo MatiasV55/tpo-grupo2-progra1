@@ -1,74 +1,119 @@
-# TODO: main_user.py Gestion de usuarios, login, el usuario puede solicitar prestamo, cambia pass
-# TODO: Busqueda de libro por nombre, logs. 
+from pass_logic import login, log_event, COLORES, limpiar_pantalla
+from modulo import (
+    register_book, register_client, list_books,
+    lend_book, return_book, initialize_files, listar_bloqueados
+)
 
-import modulo as f
+def mostrar_libros(books, titulo):
+    print(COLORES["bright"] + f"\n{titulo} ({len(books)}):" + COLORES["reset"])
+    if not books:
+        print(COLORES["alerta"] + "No hay libros en esta categoría." + COLORES["reset"])
+    else:
+        for b in books:
+            estado = "Disponible" if b[3] == 'True' else f"Prestado a {b[4]} el {b[5]}"
+            print(f"ID: {b[0]} | {b[1]} ({b[2]}) → {estado}")
 
-def show_menu():
-    print("\n--- Sistema de Gestión de Biblioteca (PySGB) ---")
-    print("1. Registrar libro")
-    print("2. Registrar usuario")
-    print("3. Listar libros disponibles")
-    print("4. Listar libros prestados")
-    print("5. Obtener usuarios penalizados")
-    print("0. Salir")
-    
-def main():
+
+def menu_principal(usuario):
     while True:
-        show_menu()
-        option = input("Seleccione una opción: ")
-        
-        try:
-            if option == "1":
-                title = input("Titulo: ")
-                author = input("Autor: ")
-                result = f.register_book(title, author)
-                print(f"Se ha registrado el libro '{title}' con el ID {result}")
+        print(COLORES["bright"] + "\n════════ MENU PySGB ════════" + COLORES["reset"])
+        print("1. Registrar libro 📘")
+        print("2. Registrar cliente 👤")
+        print("3. Listar libros disponibles 📗")
+        print("4. Listar libros prestados 📕")
+        print("5. Prestar libro 🔄")
+        print("6. Devolver libro ↩️")
+        print("7. Listar clientes bloqueados 🚫")
+        print("8. Salir 🚪")
 
-            elif option == "2":
-                name = input("Nombre del usuario: ")
-                if any(char.isdigit() for char in name):
-                    raise ValueError("El nombre no puede contener números.")
-                result = f.register_user(name)
-                print(f"Se ha registrado el usuario '{name}' con el ID {result}")
+        opcion = input("Seleccione una opción: ")
 
-            elif option == "3":
-                available = f.list_books()
-                if not available:
-                    print("No hay libros disponibles.")
-                for book in available:
-                    print(f"{book[1]} - {book[2]}")
+        if opcion == "1":
+            titulo = input("Título: ")
+            autor = input("Autor: ")
+            try:
+                id_libro = register_book(titulo, autor)
+                print(COLORES["ok"] + f"✅ Libro registrado con ID {id_libro}" + COLORES["reset"])
+                log_event("register_book", "INFO", f"Libro '{titulo}' registrado.", usuario=usuario)
+            except Exception as e:
+                print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                log_event("register_book_error", "ERROR", str(e), usuario=usuario)
 
-            elif option == "4":
-                lent = f.list_books(status="prestado")
-                if not lent:
-                    print("No hay libros prestados.")
-                for book in lent:
-                    print(book)
-            elif option == "5":
-                users_list = f.get_users()
-                if not users_list:
-                    print("No hay usuarios penalizados.")
-                else:
-                    penalizados = list(filter(
-                        lambda user: int(user[2]) >= 3 and user[3] is not None,
-                        users_list))
-                    
-                    if not penalizados:
-                        print("No hay usuarios penalizados.")
-                    else:
-                        print("Usuarios penalizados:")
-                        for user in penalizados:
-                            print(user)
+        elif opcion == "2":
+            nombre = input("Nombre del cliente: ")
+            try:
+                id_client = register_client(nombre)
+                print(COLORES["ok"] + f"✅ Cliente '{nombre}' registrado con ID {id_client}" + COLORES["reset"])
+                log_event("register_client", "INFO", f"Cliente '{nombre}' registrado.", usuario=usuario)
+            except Exception as e:
+                print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                log_event("register_client_error", "ERROR", str(e), usuario=usuario)
 
-            elif option == "0":
-                print("Saliendo del sistema...")
-                break
+        elif opcion == "3":
+            disponibles = list_books("disponible")
+            mostrar_libros(disponibles, "📗 Libros Disponibles")
+            log_event("list_books", "INFO", "Libros disponibles listados.", usuario=usuario)
 
+        elif opcion == "4":
+            prestados = list_books("prestado")
+            mostrar_libros(prestados, "📕 Libros Prestados")
+            log_event("list_books_borrowed", "INFO", "Libros prestados listados.", usuario=usuario)
+
+        elif opcion == "5":
+            try:
+                mostrar_libros(list_books("disponible"), "📗 Libros Disponibles")
+                book_id = input("\nIngrese el ID del libro a prestar: ")
+                nombre = input("Ingrese el nombre del cliente: ")
+                lend_book(book_id, nombre)
+                print(COLORES["ok"] + "✅ Libro prestado correctamente." + COLORES["reset"])
+                log_event("lend_book", "INFO", f"Libro ID {book_id} prestado a {nombre}.", usuario=usuario)
+            except Exception as e:
+                print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                log_event("lend_book_error", "ERROR", str(e), usuario=usuario)
+
+        elif opcion == "6":
+            try:
+                mostrar_libros(list_books("prestado"), "📕 Libros Prestados")
+                book_id = input("\nIngrese el ID del libro a devolver: ")
+                return_book(book_id)
+                print(COLORES["ok"] + "✅ Libro devuelto correctamente." + COLORES["reset"])
+                log_event("return_book", "INFO", f"Libro ID {book_id} devuelto.", usuario=usuario)
+            except Exception as e:
+                print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                log_event("return_book_error", "ERROR", str(e), usuario=usuario)
+                
+        elif opcion == "7":
+            bloqueados = listar_bloqueados()
+            if not bloqueados:
+                print(COLORES["ok"] + "✅ No hay clientes bloqueados actualmente." + COLORES["reset"])
             else:
-                print("Opción no válida. Intente nuevamente.")
+                print(COLORES["alerta"] + "\n🚫 Clientes bloqueados:" + COLORES["reset"])
+            for c in bloqueados:
+                print(f"ID: {c['id']} | {c['nombre']} | Strikes: {c['strikes']} | Bloqueado hasta: {c['bloqueado_hasta']}")
 
-        except Exception as e:
-            print(f"Error: {e}")
+
+        elif opcion == "8":
+            print(COLORES["rosa"] + "👋 Saliendo del sistema. ¡Hasta luego!" + COLORES["reset"])
+            log_event("logout", "INFO", "Sesión cerrada.", usuario=usuario)
+            break
+        else:
+            print(COLORES["alerta"] + "⚠ Opción inválida." + COLORES["reset"])
+
+
+def main():
+    initialize_files()
+    limpiar_pantalla()
+    print(COLORES["bright"] + "📚 Bienvenido a PySGB" + COLORES["reset"])
+    print("Sistema de Gestión de Biblioteca con Control de Clientes\n")
+
+    try:
+        usuario, _ = login()
+        log_event("login_success", "INFO", "Inicio de sesión exitoso.", usuario=usuario)
+        menu_principal(usuario)
+    except Exception as e:
+        print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+        log_event("login_failed", "ERROR", str(e), funcion="main")
+
 
 if __name__ == "__main__":
     main()
