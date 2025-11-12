@@ -14,22 +14,42 @@ def initialize_files():
     if not os.path.exists(BOOKS_FILE):
         with open(BOOKS_FILE, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['id', 'titulo', 'autor', 'disponible', 'cliente_prestamo',
-                             'fecha_prestamo', 'fecha_limite'])
+            writer.writerow([
+                'id', 'titulo', 'autor', 'genero', 'anio_publicacion',
+                'editorial', 'idioma', 'paginas', 'disponible',
+                'cliente_prestamo', 'fecha_prestamo', 'fecha_limite'
+            ])
+
     if not os.path.exists(CLIENTS_FILE):
         with open(CLIENTS_FILE, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['id', 'nombre', 'prestamos', 'strikes', 'bloqueado_hasta'])
+            writer.writerow([
+                'id', 'nombre', 'edad', 'genero', 'ciudad', 'pais',
+                'prestamos', 'strikes', 'bloqueado_hasta'
+            ])
 
 
-def read_file(filename):
-    all_rows = []
+def read_file(filename, page_size=None, page_number=0):
+    rows = []
+    if not os.path.exists(filename):
+        return rows
+
     with open(filename, mode='r', newline='', encoding='utf-8') as csvfile:
         csvreader = csv.reader(csvfile)
         next(csvreader, None)
-        for row in csvreader:
-            all_rows.append(row)
-    return all_rows
+
+        if page_size is None:
+            for row in csvreader:
+                rows.append(row)
+        else:
+            start = page_number * page_size
+            for _ in range(start):
+                next(csvreader, None)
+            for i, row in enumerate(csvreader):
+                if i >= page_size:
+                    break
+                rows.append(row)
+    return rows
 
 
 def get_books():
@@ -40,52 +60,60 @@ def get_clients():
     return read_file(CLIENTS_FILE)
 
 
-def register_book(title, author):
+def register_book(titulo, autor, genero="", anio_publicacion="", editorial="", idioma="", paginas=""):
     books = get_books()
     new_id = max([int(b[0]) for b in books], default=0) + 1
-    new_book = [new_id, title, author, 'True', '', '', '']
-    with open(BOOKS_FILE, 'a', newline='\n', encoding='utf-8') as csvfile:
+    new_book = [
+        new_id, titulo, autor, genero, anio_publicacion,
+        editorial, idioma, paginas, 'True', '', '', ''
+    ]
+    with open(BOOKS_FILE, 'a', newline='', encoding='utf-8') as csvfile:
         csv.writer(csvfile).writerow(new_book)
     return new_id
 
 
-def register_client(name):
+def register_client(nombre, edad="", genero="", ciudad="", pais=""):
     clients = get_clients()
-    normalized_name = name.strip().lower()
+    normalized_name = nombre.strip().lower()
 
     for client in clients:
         if client[1].strip().lower() == normalized_name:
-            raise ValueError(f"El cliente con el nombre '{name}' ya existe.")
+            raise ValueError(f"El cliente con el nombre '{nombre}' ya existe.")
 
     new_id = max([int(u[0]) for u in clients], default=0) + 1
-    new_client = [new_id, name.strip(), 0, 0, '']
+    new_client = [new_id, nombre.strip(), edad, genero, ciudad, pais, '0', '0', '']
 
-    with open(CLIENTS_FILE, 'a', newline='\n', encoding='utf-8') as csvfile:
+    with open(CLIENTS_FILE, 'a', newline='', encoding='utf-8') as csvfile:
         csv.writer(csvfile).writerow(new_client)
 
     return new_id
 
 
-
 def save_books(books):
-    with open(BOOKS_FILE, 'w', newline='\n', encoding='utf-8') as csvfile:
+    with open(BOOKS_FILE, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['id', 'titulo', 'autor', 'disponible', 'cliente_prestamo',
-                         'fecha_prestamo', 'fecha_limite'])
+        writer.writerow([
+            'id', 'titulo', 'autor', 'genero', 'anio_publicacion',
+            'editorial', 'idioma', 'paginas', 'disponible',
+            'cliente_prestamo', 'fecha_prestamo', 'fecha_limite'
+        ])
         writer.writerows(books)
 
 
 def save_clients(clients):
-    with open(CLIENTS_FILE, 'w', newline='\n', encoding='utf-8') as csvfile:
+    with open(CLIENTS_FILE, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['id', 'nombre', 'prestamos', 'strikes', 'bloqueado_hasta'])
+        writer.writerow([
+            'id', 'nombre', 'edad', 'genero', 'ciudad', 'pais',
+            'prestamos', 'strikes', 'bloqueado_hasta'
+        ])
         writer.writerows(clients)
 
 
-def search_client(name):
+def search_client(nombre):
     clients = get_clients()
     for client in clients:
-        if client[1].lower() == name.lower():
+        if client[1].lower() == nombre.lower():
             return client
     return None
 
@@ -93,10 +121,10 @@ def search_client(name):
 def list_books(status="disponible"):
     books = get_books()
     if status == "disponible":
-        return [book for book in books if book[3] == 'True']
+        return [b for b in books if (b[8] == 'True' or b[8] == '') ]
     elif status == "prestado":
-        return [book for book in books if book[3] == 'False']
-    return []
+        return [b for b in books if b[8] == 'False']
+    return books
 
 
 def lend_book(book_id, client_name):
@@ -107,25 +135,26 @@ def lend_book(book_id, client_name):
     if not client:
         raise ValueError("Cliente no encontrado.")
 
-    if client[4]:
-        bloqueado_hasta = datetime.strptime(client[4], "%Y-%m-%d")
-        if bloqueado_hasta >= datetime.now():
-            raise ValueError(f"El cliente está bloqueado hasta {client[4]}.")
+    bloqueado_hasta = client[8]
+    if bloqueado_hasta:
+        bloqueado_dt = datetime.strptime(bloqueado_hasta, "%Y-%m-%d")
+        if bloqueado_dt >= datetime.now():
+            raise ValueError(f"El cliente está bloqueado hasta {bloqueado_hasta}.")
 
     book = next((b for b in books if str(b[0]) == str(book_id)), None)
     if not book:
         raise ValueError("No se encontró un libro con ese ID.")
-    if book[3] == 'False':
+    if book[8] == 'False':
         raise ValueError("El libro ya está prestado.")
 
-    book[3] = 'False'
-    book[4] = client_name
+    book[8] = 'False'
+    book[9] = client_name
     fecha_prestamo = datetime.now()
     fecha_limite = fecha_prestamo + timedelta(days=DIAS_PRESTAMO)
-    book[5] = fecha_prestamo.strftime("%Y-%m-%d")
-    book[6] = fecha_limite.strftime("%Y-%m-%d")
+    book[10] = fecha_prestamo.strftime("%Y-%m-%d")
+    book[11] = fecha_limite.strftime("%Y-%m-%d")
 
-    client[2] = str(int(client[2]) + 1)
+    client[6] = str(int(client[6]) + 1)
 
     save_books(books)
     save_clients(clients)
@@ -139,26 +168,26 @@ def return_book(book_id):
     book = next((b for b in books if str(b[0]) == str(book_id)), None)
     if not book:
         raise ValueError("No se encontró un libro con ese ID.")
-    if book[3] == 'True':
+    if book[8] == 'True':
         raise ValueError("El libro ya está disponible.")
 
-    client_name = book[4]
-    fecha_limite = datetime.strptime(book[6], "%Y-%m-%d")
+    client_name = book[9]
+    fecha_limite = datetime.strptime(book[11], "%Y-%m-%d")
     fecha_actual = datetime.now()
 
-    book[3] = 'True'
-    book[4] = ''
-    book[5] = ''
-    book[6] = ''
+    book[8] = 'True'
+    book[9] = ''
+    book[10] = ''
+    book[11] = ''
 
     client = next((c for c in clients if c[1].lower() == client_name.lower()), None)
     if client:
         if fecha_actual > fecha_limite:
-            strikes = int(client[3]) + 1
-            client[3] = str(strikes)
+            strikes = int(client[7]) + 1
+            client[7] = str(strikes)
             if strikes >= STRIKES_MAXIMOS:
-                client[4] = (fecha_actual + timedelta(days=BLOQUEO_DIAS)).strftime("%Y-%m-%d")
-                print(f"Cliente {client[1]} bloqueado hasta {client[4]} por acumulación de strikes.")
+                client[8] = (fecha_actual + timedelta(days=BLOQUEO_DIAS)).strftime("%Y-%m-%d")
+                print(f"Cliente {client[1]} bloqueado hasta {client[8]} por acumulación de strikes.")
             else:
                 print(f"Cliente {client[1]} recibió un strike ({strikes}/{STRIKES_MAXIMOS}).")
 
@@ -174,19 +203,19 @@ def listar_bloqueados():
     fecha_actual = datetime.now()
 
     for c in clients:
-        bloqueado_hasta = c[4]
+        bloqueado_hasta = c[8]
         if bloqueado_hasta:
             fecha_bloqueo = datetime.strptime(bloqueado_hasta, "%Y-%m-%d")
             if fecha_bloqueo >= fecha_actual:
                 bloqueados.append({
                     "id": c[0],
                     "nombre": c[1],
-                    "strikes": c[3],
+                    "strikes": c[7],
                     "bloqueado_hasta": bloqueado_hasta
                 })
             else:
-                c[4] = ''
-                c[3] = '0'
+                c[8] = ''
+                c[7] = '0'
                 cambios = True
 
     if cambios:

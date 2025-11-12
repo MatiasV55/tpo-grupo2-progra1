@@ -4,13 +4,14 @@ from modulo import (
     lend_book, return_book, initialize_files, listar_bloqueados
 )
 
+
 def mostrar_libros(books, titulo):
     print(COLORES["bright"] + f"\n{titulo} ({len(books)}):" + COLORES["reset"])
     if not books:
         print(COLORES["alerta"] + "No hay libros en esta categoría." + COLORES["reset"])
     else:
         for b in books:
-            estado = "Disponible" if b[3] == 'True' else f"Prestado a {b[4]} el {b[5]}"
+            estado = "Disponible" if b[8] == 'True' else f"Prestado a {b[9]} el {b[10]}"
             print(f"ID: {b[0]} | {b[1]} ({b[2]}) → {estado}")
 
 
@@ -31,8 +32,14 @@ def menu_principal(usuario):
         if opcion == "1":
             titulo = input("Título: ")
             autor = input("Autor: ")
+            genero = input("Género (opcional): ")
+            anio = input("Año de publicación (opcional): ")
+            editorial = input("Editorial (opcional): ")
+            idioma = input("Idioma (opcional): ")
+            paginas = input("Número de páginas (opcional): ")
+
             try:
-                id_libro = register_book(titulo, autor)
+                id_libro = register_book(titulo, autor, genero, anio, editorial, idioma, paginas)
                 print(COLORES["ok"] + f"✅ Libro registrado con ID {id_libro}" + COLORES["reset"])
                 log_event("register_book", "INFO", f"Libro '{titulo}' registrado.", usuario=usuario)
             except Exception as e:
@@ -41,8 +48,13 @@ def menu_principal(usuario):
 
         elif opcion == "2":
             nombre = input("Nombre del cliente: ")
+            edad = input("Edad (opcional): ")
+            genero = input("Género (opcional): ")
+            ciudad = input("Ciudad (opcional): ")
+            pais = input("País (opcional): ")
+
             try:
-                id_client = register_client(nombre)
+                id_client = register_client(nombre, edad, genero, ciudad, pais)
                 print(COLORES["ok"] + f"✅ Cliente '{nombre}' registrado con ID {id_client}" + COLORES["reset"])
                 log_event("register_client", "INFO", f"Cliente '{nombre}' registrado.", usuario=usuario)
             except Exception as e:
@@ -62,9 +74,11 @@ def menu_principal(usuario):
         elif opcion == "5":
             try:
                 mostrar_libros(list_books("disponible"), "📗 Libros Disponibles")
-                book_id = input("\nIngrese el ID del libro a prestar: ")
+                book_id = input("\nIngrese el ID del libro a prestar: ").strip()
+                if not book_id.isdigit():
+                    raise ValueError("El ID del libro debe ser numérico.")
                 nombre = input("Ingrese el nombre del cliente: ")
-                lend_book(book_id, nombre)
+                lend_book(int(book_id), nombre)
                 print(COLORES["ok"] + "✅ Libro prestado correctamente." + COLORES["reset"])
                 log_event("lend_book", "INFO", f"Libro ID {book_id} prestado a {nombre}.", usuario=usuario)
             except Exception as e:
@@ -74,8 +88,10 @@ def menu_principal(usuario):
         elif opcion == "6":
             try:
                 mostrar_libros(list_books("prestado"), "📕 Libros Prestados")
-                book_id = input("\nIngrese el ID del libro a devolver: ")
-                return_book(book_id)
+                book_id = input("\nIngrese el ID del libro a devolver: ").strip()
+                if not book_id.isdigit():
+                    raise ValueError("El ID del libro debe ser numérico.")
+                return_book(int(book_id))
                 print(COLORES["ok"] + "✅ Libro devuelto correctamente." + COLORES["reset"])
                 log_event("return_book", "INFO", f"Libro ID {book_id} devuelto.", usuario=usuario)
             except Exception as e:
@@ -88,9 +104,8 @@ def menu_principal(usuario):
                 print(COLORES["ok"] + "✅ No hay clientes bloqueados actualmente." + COLORES["reset"])
             else:
                 print(COLORES["alerta"] + "\n🚫 Clientes bloqueados:" + COLORES["reset"])
-            for c in bloqueados:
-                print(f"ID: {c['id']} | {c['nombre']} | Strikes: {c['strikes']} | Bloqueado hasta: {c['bloqueado_hasta']}")
-
+                for c in bloqueados:
+                    print(f"ID: {c['id']} | {c['nombre']} | Strikes: {c['strikes']} | Bloqueado hasta: {c['bloqueado_hasta']}")
 
         elif opcion == "8":
             print(COLORES["rosa"] + "👋 Saliendo del sistema. ¡Hasta luego!" + COLORES["reset"])

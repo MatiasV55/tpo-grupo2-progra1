@@ -1,0 +1,28 @@
+fecha;gravedad;evento;usuario;funcion;mensaje;extra
+2025-11-11 20:33:58;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:34:01;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:34:04;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:37:16;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:37:18;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:38:35;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:38:38;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:38:58;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:39:00;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:43:26;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:43:29;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:44:26;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:44:29;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:46:37;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:46:40;INFO;list_books;mviano;;Libros disponibles listados.;
+2025-11-11 20:47:08;INFO;list_books_borrowed;mviano;;Libros prestados listados.;
+2025-11-11 20:48:58;ERROR;lend_book_error;mviano;;list index out of range;
+2025-11-11 20:53:14;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 20:53:23;ERROR;lend_book_error;mviano;;invalid literal for int() with base 10: '';
+2025-11-11 21:02:13;ERROR;login_failed;;main;[33m⚠ No se creó el usuario. Saliendo del login.[0m;
+2025-11-11 21:02:19;INFO;login_success;mviano;;Inicio de sesión exitoso.;
+2025-11-11 21:02:29;INFO;lend_book;mviano;;Libro ID 2 prestado a Usuario 3.;
+2025-11-11 21:02:33;INFO;list_books_borrowed;mviano;;Libros prestados listados.;
+2025-11-11 21:02:46;INFO;return_book;mviano;;Libro ID 2 devuelto.;
+2025-11-11 21:03:03;INFO;register_client;mviano;;Cliente 'Matias' registrado.;
+2025-11-11 21:03:14;INFO;lend_book;mviano;;Libro ID 2 prestado a Matias.;
+2025-11-11 21:03:18;INFO;list_books_borrowed;mviano;;Libros prestados listados.;
