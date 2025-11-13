@@ -26,3 +26,6 @@ fecha;gravedad;evento;usuario;funcion;mensaje;extra
 2025-11-11 21:03:03;INFO;register_client;mviano;;Cliente 'Matias' registrado.;
 2025-11-11 21:03:14;INFO;lend_book;mviano;;Libro ID 2 prestado a Matias.;
 2025-11-11 21:03:18;INFO;list_books_borrowed;mviano;;Libros prestados listados.;
+2025-11-13 20:15:03;ERROR;login_failed;;main;EOF when reading a line;
+2025-11-13 20:15:57;INFO;login_success;misa;;Inicio de sesión exitoso.;
+2025-11-13 20:16:02;INFO;list_books;misa;;Libros disponibles listados.;

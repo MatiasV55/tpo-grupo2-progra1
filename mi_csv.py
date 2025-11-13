@@ -1,59 +1,42 @@
 """
-Módulo CSV personalizado implementado con Python nativo.
-Reemplaza la funcionalidad básica del módulo csv estándar.
+Módulo CSV hecho por nosotros mismos.
+Implementación básica para leer y escribir archivos CSV sin usar la librería csv de Python.
 """
 
 
-def _escapar_campo(campo):
+def escapar_campo(campo):
     """
-    Escapa un campo si contiene comas, comillas o saltos de línea.
-    
-    Args:
-        campo: El valor del campo a escapar (se convierte a string)
-    
-    Returns:
-        str: El campo escapado con comillas si es necesario
+    Si un campo tiene comas, comillas o saltos de línea, lo envolvemos en comillas.
+    También escapamos las comillas dobles duplicándolas.
     """
     campo_str = str(campo)
     
-    # Si el campo contiene comas, comillas o saltos de línea, lo envolvemos en comillas
+    # Si tiene caracteres especiales, lo ponemos entre comillas
     if ',' in campo_str or '"' in campo_str or '\n' in campo_str:
-        # Escapamos las comillas dobles duplicándolas
+        # Duplicamos las comillas para escaparlas
         campo_str = campo_str.replace('"', '""')
         return f'"{campo_str}"'
     
     return campo_str
 
 
-def _parsear_campo(campo):
+def parsear_campo(campo):
     """
-    Parsea un campo del CSV, manejando comillas y escapes.
-    
-    Args:
-        campo: El campo como string (ya sin espacios iniciales/finales)
-    
-    Returns:
-        str: El campo parseado sin comillas de escape
+    Quita las comillas de un campo y restaura las comillas escapadas.
     """
     campo = campo.strip()
     
-    # Si está entre comillas
+    # Si está entre comillas, las quitamos
     if campo.startswith('"') and campo.endswith('"'):
-        campo = campo[1:-1]  # Quitamos las comillas externas
+        campo = campo[1:-1]  # Quitamos las comillas de los extremos
         campo = campo.replace('""', '"')  # Restauramos comillas escapadas
     
     return campo
 
 
-def _parsear_linea(linea):
+def parsear_linea(linea):
     """
-    Parsea una línea de CSV separada por comas.
-    
-    Args:
-        linea: String con una línea completa del CSV
-    
-    Returns:
-        list: Lista de campos parseados
+    Separa una línea de CSV en campos, manejando comas y comillas correctamente.
     """
     campos = []
     campo_actual = ""
@@ -64,41 +47,41 @@ def _parsear_linea(linea):
         caracter = linea[i]
         
         if caracter == '"':
+            # Si encontramos una comilla
             if dentro_comillas and i + 1 < len(linea) and linea[i + 1] == '"':
-                # Comilla escapada ""
+                # Es una comilla escapada ""
                 campo_actual += '"'
-                i += 2
+                i += 2  # Avanzamos 2 posiciones
                 continue
             else:
-                # Inicio o fin de comillas
+                # Es el inicio o fin de un campo entre comillas
                 dentro_comillas = not dentro_comillas
         elif caracter == ',' and not dentro_comillas:
-            # Separador de campo
-            campos.append(_parsear_campo(campo_actual))
+            # Es un separador de campo (solo si no estamos dentro de comillas)
+            campos.append(parsear_campo(campo_actual))
             campo_actual = ""
         else:
+            # Es un carácter normal, lo agregamos al campo actual
             campo_actual += caracter
         
         i += 1
     
-    # Agregar el último campo
-    campos.append(_parsear_campo(campo_actual))
+    # Agregamos el último campo (después de la última coma)
+    campos.append(parsear_campo(campo_actual))
     
     return campos
 
 
 class writer:
     """
-    Clase para escribir archivos CSV (similar a csv.writer).
+    Clase para escribir archivos CSV.
+    Similar a csv.writer pero hecho por nosotros.
     """
     
     def __init__(self, archivo, delimiter=','):
         """
-        Inicializa el writer.
-        
-        Args:
-            archivo: Archivo abierto en modo escritura
-            delimiter: Delimitador (por defecto coma)
+        Inicializa el writer con un archivo abierto.
+        delimiter es el separador (por defecto coma).
         """
         self.archivo = archivo
         self.delimiter = delimiter
@@ -106,20 +89,18 @@ class writer:
     def writerow(self, fila):
         """
         Escribe una fila en el archivo CSV.
-        
-        Args:
-            fila: Lista o tupla con los valores de la fila
+        fila es una lista o tupla con los valores.
         """
-        campos = [_escapar_campo(campo) for campo in fila]
-        linea = self.delimiter.join(campos) + '\n'
+        # Escapamos cada campo por si tiene comas o comillas
+        campos_escapados = [escapar_campo(campo) for campo in fila]
+        # Unimos con el delimitador y agregamos salto de línea
+        linea = self.delimiter.join(campos_escapados) + '\n'
         self.archivo.write(linea)
     
     def writerows(self, filas):
         """
-        Escribe múltiples filas en el archivo CSV.
-        
-        Args:
-            filas: Lista de listas/tuplas, cada una representa una fila
+        Escribe varias filas en el archivo CSV.
+        filas es una lista de listas/tuplas.
         """
         for fila in filas:
             self.writerow(fila)
@@ -127,41 +108,37 @@ class writer:
 
 class reader:
     """
-    Clase para leer archivos CSV (similar a csv.reader).
+    Clase para leer archivos CSV.
+    Similar a csv.reader pero hecho por nosotros.
     """
     
     def __init__(self, archivo, delimiter=','):
         """
-        Inicializa el reader.
-        
-        Args:
-            archivo: Archivo abierto en modo lectura
-            delimiter: Delimitador (por defecto coma)
+        Inicializa el reader con un archivo abierto.
+        delimiter es el separador (por defecto coma).
         """
         self.archivo = archivo
         self.delimiter = delimiter
     
     def __iter__(self):
-        """Hace que el reader sea iterable."""
+        """
+        Hace que el reader sea iterable (para usar en for loops).
+        """
         return self
     
     def __next__(self):
         """
-        Lee la siguiente línea del CSV.
-        
-        Returns:
-            list: Lista de campos parseados
-        
-        Raises:
-            StopIteration: Cuando no hay más líneas
+        Lee la siguiente línea del CSV y la devuelve como lista de campos.
+        Si no hay más líneas, lanza StopIteration.
         """
         linea = self.archivo.readline()
         
+        # Si no hay más líneas, terminamos
         if not linea:
             raise StopIteration
         
-        # Quitamos el salto de línea final
+        # Quitamos el salto de línea del final
         linea = linea.rstrip('\n\r')
         
-        return _parsear_linea(linea)
-
+        # Parseamos la línea y devolvemos los campos
+        return parsear_linea(linea)
