@@ -1,6 +1,6 @@
-import csv
 import os
 from datetime import datetime, timedelta
+from mi_csv import writer, reader
 
 DIAS_PRESTAMO = 7
 BLOQUEO_DIAS = 3
@@ -13,8 +13,8 @@ CLIENTS_FILE = "clients.csv"
 def initialize_files():
     if not os.path.exists(BOOKS_FILE):
         with open(BOOKS_FILE, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow([
+            csv_writer = writer(f)
+            csv_writer.writerow([
                 'id', 'titulo', 'autor', 'genero', 'anio_publicacion',
                 'editorial', 'idioma', 'paginas', 'disponible',
                 'cliente_prestamo', 'fecha_prestamo', 'fecha_limite'
@@ -22,8 +22,8 @@ def initialize_files():
 
     if not os.path.exists(CLIENTS_FILE):
         with open(CLIENTS_FILE, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow([
+            csv_writer = writer(f)
+            csv_writer.writerow([
                 'id', 'nombre', 'edad', 'genero', 'ciudad', 'pais',
                 'prestamos', 'strikes', 'bloqueado_hasta'
             ])
@@ -35,8 +35,8 @@ def read_file(filename, page_size=None, page_number=0):
         return rows
 
     with open(filename, mode='r', newline='', encoding='utf-8') as csvfile:
-        csvreader = csv.reader(csvfile)
-        next(csvreader, None)
+        csvreader = reader(csvfile)
+        next(csvreader, None)  # Saltar encabezado
 
         if page_size is None:
             for row in csvreader:
@@ -68,7 +68,7 @@ def register_book(titulo, autor, genero="", anio_publicacion="", editorial="", i
         editorial, idioma, paginas, 'True', '', '', ''
     ]
     with open(BOOKS_FILE, 'a', newline='', encoding='utf-8') as csvfile:
-        csv.writer(csvfile).writerow(new_book)
+        writer(csvfile).writerow(new_book)
     return new_id
 
 
@@ -84,30 +84,30 @@ def register_client(nombre, edad="", genero="", ciudad="", pais=""):
     new_client = [new_id, nombre.strip(), edad, genero, ciudad, pais, '0', '0', '']
 
     with open(CLIENTS_FILE, 'a', newline='', encoding='utf-8') as csvfile:
-        csv.writer(csvfile).writerow(new_client)
+        writer(csvfile).writerow(new_client)
 
     return new_id
 
 
 def save_books(books):
     with open(BOOKS_FILE, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow([
+        csv_writer = writer(csvfile)
+        csv_writer.writerow([
             'id', 'titulo', 'autor', 'genero', 'anio_publicacion',
             'editorial', 'idioma', 'paginas', 'disponible',
             'cliente_prestamo', 'fecha_prestamo', 'fecha_limite'
         ])
-        writer.writerows(books)
+        csv_writer.writerows(books)
 
 
 def save_clients(clients):
     with open(CLIENTS_FILE, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow([
+        csv_writer = writer(csvfile)
+        csv_writer.writerow([
             'id', 'nombre', 'edad', 'genero', 'ciudad', 'pais',
             'prestamos', 'strikes', 'bloqueado_hasta'
         ])
-        writer.writerows(clients)
+        csv_writer.writerows(clients)
 
 
 def search_client(nombre):
