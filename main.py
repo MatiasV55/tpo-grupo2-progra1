@@ -30,9 +30,15 @@ def mostrar_libros(books, titulo, page_size=PAGE_SIZE):
             + COLORES["reset"]
         )
 
+        # Encabezado de columnas
+        print(COLORES["bright"] + f"{'ID':<6} | {'Título':<50} | {'Autor':<30} | {'Estado':<15}" + COLORES["reset"])
+        print("-" * 110)
+
         for b in books[inicio:fin]:
-            estado = "Disponible" if b[8] == 'True' else f"Prestado a {b[9]} el {b[10]}"
-            print(f"ID: {b[0]} | {b[1]} ({b[2]}) → {estado}")
+            estado = "Disponible" if b[8] == 'True' else "No disponible"
+            titulo_libro = b[1] if len(b[1]) <= 50 else b[1][:47] + "..."
+            autor_libro = b[2] if len(b[2]) <= 30 else b[2][:27] + "..."
+            print(f"{b[0]:<6} | {titulo_libro:<50} | {autor_libro:<30} | {estado:<15}")
 
         if fin >= total:
             break
