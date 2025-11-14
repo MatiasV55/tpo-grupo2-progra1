@@ -36,7 +36,7 @@ def read_file(filename, page_size=None, page_number=0):
 
     with open(filename, mode='r', newline='', encoding='utf-8') as csvfile:
         csvreader = reader(csvfile)
-        next(csvreader, None)  # Saltar encabezado
+        next(csvreader, None)
 
         if page_size is None:
             for row in csvreader:

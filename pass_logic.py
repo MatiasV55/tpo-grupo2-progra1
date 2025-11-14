@@ -5,52 +5,29 @@ from datetime import datetime
 from colorama import Fore, Style, init #instalar colorama en la terminal con python3 install colorama 
 init()
 
-# ==== Excepciones personalizadas ====
 class UsuarioNoExisteError(Exception):
-    """Se dispara cuando el usuario administrador no existe en el sistema."""
     pass
 
 class CredencialesInvalidasError(Exception):
-    """Se dispara cuando la contraseña es incorrecta o no se puede validar/desencriptar."""
     pass
 
 class ArchivoNoAccesibleError(Exception):
-    """Se dispara cuando no se puede leer/escribir un archivo requerido."""
     pass
 
 class CuentaNoEncontradaError(Exception):
-    """Se dispara cuando la cuenta solicitada no existe o el índice es inválido."""
     pass
 
 class EntradaInvalidaError(Exception):
-    """Se dispara cuando el usuario ingresa un dato con formato inválido."""
     pass
+
 class ContraseñaInvalidaError(Exception):
-    """Se dispara cuando la contraseña no cumple los requisitos mínimos."""
     pass
 
 
 def log_event(evento, nivel="INFO", mensaje="", usuario="", funcion="", extra="", filename=None):
-    
-    """Registra un evento en el archivo CSV de logs.
-
-    Parámetros:
-        evento (str): Nombre o tipo de evento a registrar.
-        nivel (str, opcional): Nivel de gravedad ('INFO', 'WARN', 'ERROR'). Por defecto "INFO".
-        mensaje (str, opcional): Descripción del evento.
-        usuario (str, opcional): Usuario asociado al evento.
-        funcion (str, opcional): Nombre de la función donde ocurrió el evento.
-        extra (str, opcional): Información adicional.
-        filename (str, opcional): Ruta del archivo CSV de log. Por defecto 'eventos_log.csv'.
-
-    - Si el archivo no existe, se crea con encabezado.
-    - No interrumpe la ejecución en caso de error de escritura.
-    """
-    
     if filename is None:
-        filename = "eventos_log.csv"  
+        filename = "eventos_log.csv"
 
-    # Compacta saltos de línea
     if "\n" in mensaje:
         mensaje = "".join(mensaje.splitlines())
     if "\n" in extra:
@@ -60,7 +37,6 @@ def log_event(evento, nivel="INFO", mensaje="", usuario="", funcion="", extra=""
     linea = f"{fecha};{nivel};{evento};{usuario};{funcion};{mensaje};{extra}\n"
 
     try:
-        # existe el archivo? si no, escribimos encabezado primero
         escribir_header = False
         try:
             with open(filename, "r", encoding="utf-8") as arch:
@@ -73,11 +49,8 @@ def log_event(evento, nivel="INFO", mensaje="", usuario="", funcion="", extra=""
                 f.write("fecha;gravedad;evento;usuario;funcion;mensaje;extra\n")
             f.write(linea)
     except OSError:
-        # nunca cortamos la app por un fallo de log
         pass
 
-
-#DATOS PRE-SETEADOS
 
 letras_mayusculas = ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Á','É','Í','Ó','Ú','Ü','Ñ')
 letras_minusculas = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','á','é','í','ó','ú','ü','ñ')
@@ -97,24 +70,7 @@ COLORES = {
 limpiar_pantalla = lambda: os.system("cls") if platform.system()=="Windows" else os.system("clear")
 
 
-def login():    
-    """
-    Inicia sesión o crea un nuevo usuario administrador.
-
-    Funcionamiento:
-        - Solicita el nombre de usuario.
-        - Si existe, valida la contraseña (con 3 intentos).
-        - Si no existe, ofrece crear una nueva cuenta con validación de contraseña.
-
-    Returns:
-        tupla: (usuario, contraseña)
-
-    Raises:
-        UsuarioNoExisteError: Si el usuario no existe y elige no crear cuenta.
-        CredencialesInvalidasError: Si falla la validación o se exceden intentos.
-        ArchivoNoAccesibleError: Si no se puede crear el archivo del nuevo usuario.
-    """
-    
+def login():
     print(COLORES["bright"] + "\n══════════════ LOGIN ══════════════" + COLORES["reset"])
 
     while True:
@@ -127,18 +83,15 @@ def login():
     try:
         with open(archivo_usuario, mode="rt", encoding="utf-8") as archivo:
             contraseña_archivada= archivo.readline().strip()
-            #Intentamos desencriptar si tiene formato encriptado.
             if ";" in contraseña_archivada:
                 try:
                     enc, lista = contraseña_archivada.split(";", 1)
                     contraseña_guardada = desencriptar(enc, enlistar(lista))
                 except Exception:
                     raise CredencialesInvalidasError(COLORES["error"]+"✖ Error al desencriptar la contraseña guardada."+ COLORES["reset"])
-                   
             else:
                 contraseña_guardada= contraseña_archivada
                 
-            #Hasta 3 intentos de ingreso
             intentos=3
 
             while intentos>0:
@@ -154,12 +107,8 @@ def login():
                     else:
                         log_event("login_attempts_exceeded", "WARN", "Excediste los 3 intentos.", usuario=user, funcion="login")
                         raise CredencialesInvalidasError(COLORES["error"]+ "Excediste los 3 intentos."+ COLORES["reset"])
-                     
 
-        
     except OSError:
-        
-        #Usuario no encontrado -> ofrece crearlo
         print(COLORES["alerta"] + f"⚠ El usuario '{user}' no existe." + COLORES["reset"])
         respuesta = input("Queres crear un nuevo usuario? (s/n): ").lower()
         
@@ -168,15 +117,13 @@ def login():
         
         if respuesta == "n":
             raise UsuarioNoExisteError(COLORES["alerta"] + "⚠ No se creó el usuario. Saliendo del login."+ COLORES["reset"])
-          
 
         print("Creando nueva cuenta...")
         while True:
             nuevaContraseña = input(COLORES["bright"]+ "🔑 Crea tu contraseña: "+ COLORES["reset"])
             
             try:
-                if validar(nuevaContraseña):        # <---- Puede levantar ContraseñaInvalidaError
-                
+                if validar(nuevaContraseña):
                     repetir=input("Repeti la contraseña ingresada: ")
             
                     if nuevaContraseña != repetir:
@@ -198,21 +145,11 @@ def login():
         
         except OSError:
             raise ArchivoNoAccesibleError(COLORES["error"]+"❌ No se pudo crear el archivo"+COLORES["reset"])
-           
             
     
 
     
 def crear_contraseña(largo_contraseña = 20):
-    """
-    Genera una contraseña aleatoria cumpliendo los requisitos mínimos de seguridad.
-
-    Parámetros:
-        largo_contraseña: Longitud deseada. Por omisión 20.
-
-    Returns:
-        str: Contraseña generada aleatoriamente.
-    """
     contraseña=[]
     for i in range(largo_contraseña):
         buscar_lista = random.randint(0,3)
@@ -230,21 +167,6 @@ def crear_contraseña(largo_contraseña = 20):
 
 
 def validar(contraseña, largo_min=12):
-    """
-    Verifica que la contraseña cumpla con los requisitos mínimos de seguridad.
-
-    Parámetros:
-        contraseña: Contraseña a validar.
-        largo_min: Longitud mínima requerida (por omisión 12).
-
-    Returns:
-        bool: True si cumple con todos los criterios.
-
-    Raises:
-        ContraseñaInvalidaError: Si falta algún requisito.
-    """
-    
-    # ---- 1. Validaciones básicas ----
     requisitos_faltantes = []
 
     if len(contraseña) < largo_min:
@@ -270,14 +192,12 @@ def validar(contraseña, largo_min=12):
         mensaje = "❌ La contraseña no cumple con los siguientes requisitos:\n" + "\n".join(requisitos_faltantes)
         raise ContraseñaInvalidaError(mensaje)
 
-    # ---- 2. Si pasa todo, calculamos robustez ----
     largo = len(contraseña)
     cantidad_mayusculas = sum(1 for c in contraseña if c in letras_mayusculas)
     cantidad_minusculas = sum(1 for c in contraseña if c in letras_minusculas)
     cantidad_numeros = sum(1 for c in contraseña if c in numeros)
     cantidad_especiales = sum(1 for c in contraseña if c in caracteres_especiales)
 
-    # Puntaje base según largo
     puntaje = largo // 2
     if largo <= 15:
         puntaje += 0
@@ -286,7 +206,6 @@ def validar(contraseña, largo_min=12):
     else:
         puntaje += 15
 
-    # Bonificaciones
     if cantidad_mayusculas > 3:
         puntaje += 2
     if cantidad_minusculas > 3:
@@ -296,13 +215,11 @@ def validar(contraseña, largo_min=12):
     if cantidad_especiales > 3:
         puntaje += 2
 
-    # Penalizaciones
     secuencias_no_recomendadas = ("123", "456", "789", "abc", "ABC")
     for palabra in secuencias_no_recomendadas:
         if palabra in contraseña:
             puntaje -= 7
 
-    # Determinamos el nivel
     if puntaje <= 12:
         nivel = COLORES["alerta"] + "⚠ DÉBIL" + COLORES["reset"]
     elif puntaje <= 25:
@@ -311,17 +228,10 @@ def validar(contraseña, largo_min=12):
         nivel = COLORES["ok"] + "FUERTE" + COLORES["reset"]
 
     print(f"Tu contraseña tiene un nivel de seguridad: {nivel}")
-    #Devuelve True si pasa todas las validaciones
     return True
 
 
 def ingresar_contraseña():
-    """
-    Permite al usuario ingresar manualmente una contraseña o generar una aleatoria.
-
-    Returns:
-        tupla: (contraseña_encriptada, lista_encriptacion)
-    """
     while True:
         while True:
             try:
@@ -339,12 +249,12 @@ def ingresar_contraseña():
             print(" 12 caracteres✅\n Una letra mayúscula✅\n Una letra minúscula✅\n Un número✅\n Un caracter especial.✅\n")
             contraseña = input("Ingrese la contraseña que quiere para esta app: ")
             
-            if validar(contraseña):       # <--- Levanta ContraseñaInvalidaError
+            if validar(contraseña):
                 contraseña_encriptada, lista_encriptacion = encriptar(contraseña)
                 return contraseña_encriptada, lista_encriptacion
             break
 
-        else:   # eleccion == 2
+        else:
             while True:
                 contraseña = crear_contraseña()
                 try:
@@ -359,23 +269,12 @@ def ingresar_contraseña():
 
     
 def encriptar(clave_original):
-    """
-    Encripta una clave generando una contraseña aleatoria del mismo largo y una lista de desplazamientos.
-
-    Args:
-        clave_original: Contraseña original en texto plano.
-
-    Returns:
-        tupla: (clave_encriptada, cadena_encriptacion)
-    """
     largo_clave_original= len(clave_original)
     clave_encriptada = crear_contraseña(largo_clave_original)
     
     lista_encriptacion = []
     
     for i in range(0,largo_clave_original):
-        
-        # Grupo y posición del carácter original
         caracter = clave_original[i]
         for j in range(0,4):
             if caracter in letras_mayusculas:
@@ -391,7 +290,6 @@ def encriptar(clave_original):
                 tupla_original = 3
                 posicion_original = caracteres_especiales.index(caracter)
                 
-         # Grupo y posición del carácter "encriptado"               
         caracter = clave_encriptada[i]
         for j in range(0,4):
             if caracter in letras_mayusculas:
@@ -407,8 +305,6 @@ def encriptar(clave_original):
                 tupla_encriptada = 3
                 posicion_encriptada = caracteres_especiales.index(caracter)
                 
-        
-         # Guardamos las diferencias intercalando el separador '|'
         lista_encriptacion.append(tupla_encriptada-tupla_original)
         lista_encriptacion.append("|")
         lista_encriptacion.append(posicion_encriptada - posicion_original)
@@ -420,16 +316,6 @@ def encriptar(clave_original):
     
   
 def desencriptar(clave_encriptada, lista_encriptacion):
-    """
-    Desencripta una clave usando la lista de encriptación generada previamente.
-
-    Parámetros:
-        clave_encriptada: Contraseña encriptada.
-        lista_encriptacion: Lista de encriptación (algortimo utilizado) generada al encriptar.
-
-    Returns:
-        str: Contraseña original.
-    """
     
     largo_clave_encriptada= len(clave_encriptada)
     clave_original = []
@@ -468,38 +354,9 @@ def desencriptar(clave_encriptada, lista_encriptacion):
     clave_original = "".join(clave_original)
     return clave_original
 
-# Convierte '1|2|3|' → [1,2,3]
 enlistar = lambda cadena: [int(x) for x in cadena.split("|") if x!=""]
 
 def main():
-    """
-    Punto de entrada principal del programa.
-
-    Funcionamiento:
-        1. Solicita inicio de sesión mediante `login()`.
-        2. Permite al usuario ingresar o generar una contraseña con `ingresar_contraseña()`.
-        3. Crea una nueva contraseña aleatoria para pruebas con `crear_contraseña()`.
-        4. Muestra ejemplos de encriptación y desencriptación de contraseñas.
-        5. Registra en logs los errores o eventos significativos.
-
-    Comportamiento:
-        - Si todo el proceso se realiza correctamente, se muestra la contraseña desencriptada.
-        - En caso de error, se registran los detalles mediante `log_event()` y se informa al usuario por consola.
-
-    Excepciones controladas:
-        - ContraseñaInvalidaError: Si la contraseña ingresada no cumple los requisitos mínimos.
-        - CuentaNoEncontradaError: Si la cuenta solicitada no existe.
-        - EntradaInvalidaError: Si el usuario ingresa un dato con formato incorrecto.
-        - CredencialesInvalidasError: Si la validación del usuario o contraseña falla.
-        - UsuarioNoExisteError: Si el usuario no existe y decide no crearlo.
-        - ArchivoNoAccesibleError: Si ocurre un error al leer o escribir archivos.
-        - Exception: Cualquier otro error no previsto.
-
-    Comentario:
-        Esta función se ejecuta automáticamente al iniciar el script mediante:
-            if __name__ == "__main__":
-                main()
-    """
     while True:
         try:
             user, contraseña = login()
@@ -512,7 +369,6 @@ def main():
 
             print(encriptar(contraseña1))
 
-            # Para desencriptar la anterior (contraseña_enc), necesitamos la lista como ints
             candena_desen = desencriptar(contraseña,enlistar(lista))
 
             print(candena_desen)

@@ -30,7 +30,6 @@ def mostrar_libros(books, titulo, page_size=PAGE_SIZE):
             + COLORES["reset"]
         )
 
-        # Encabezado de columnas
         print(COLORES["bright"] + f"{'ID':<6} | {'Título':<50} | {'Autor':<30} | {'Estado':<15}" + COLORES["reset"])
         print("-" * 110)
 
@@ -77,7 +76,6 @@ def mostrar_clientes(clients, titulo, page_size=PAGE_SIZE):
             + COLORES["reset"]
         )
 
-        # Encabezado de columnas
         print(COLORES["bright"] + f"{'ID':<6} | {'Nombre':<30} | {'Edad':<6} | {'Ciudad':<20} | {'Préstamos':<10} | {'Strikes':<8}" + COLORES["reset"])
         print("-" * 100)
 
