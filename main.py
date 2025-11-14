@@ -1,7 +1,7 @@
 from pass_logic import login, log_event, COLORES, limpiar_pantalla
 from modulo import (
     register_book, register_client, list_books,
-    lend_book, return_book, initialize_files, listar_bloqueados
+    lend_book, return_book, initialize_files, listar_bloqueados, get_clients
 )
 
 
@@ -55,6 +55,56 @@ def mostrar_libros(books, titulo, page_size=PAGE_SIZE):
         pagina += 1
 
 
+def mostrar_clientes(clients, titulo, page_size=PAGE_SIZE):
+    total = len(clients)
+    print(COLORES["bright"] + f"\n{titulo} ({total}):" + COLORES["reset"])
+
+    if not clients:
+        print(COLORES["alerta"] + "No hay clientes registrados." + COLORES["reset"])
+        return
+
+    pagina = 0
+    while True:
+        inicio = pagina * page_size
+        if inicio >= total:
+            print(COLORES["alerta"] + "No hay más clientes para mostrar." + COLORES["reset"])
+            break
+
+        fin = min(inicio + page_size, total)
+        print(
+            COLORES["bright"]
+            + f"\n{titulo} {inicio + 1}-{fin} de {total}:"
+            + COLORES["reset"]
+        )
+
+        # Encabezado de columnas
+        print(COLORES["bright"] + f"{'ID':<6} | {'Nombre':<30} | {'Edad':<6} | {'Ciudad':<20} | {'Préstamos':<10} | {'Strikes':<8}" + COLORES["reset"])
+        print("-" * 100)
+
+        for c in clients[inicio:fin]:
+            nombre_cliente = c[1] if len(c[1]) <= 30 else c[1][:27] + "..."
+            edad = c[2] if c[2] else "-"
+            ciudad = c[4] if c[4] else "-"
+            ciudad = ciudad if len(ciudad) <= 20 else ciudad[:17] + "..."
+            prestamos = c[6] if c[6] else "0"
+            strikes = c[7] if c[7] else "0"
+            print(f"{c[0]:<6} | {nombre_cliente:<30} | {edad:<6} | {ciudad:<20} | {prestamos:<10} | {strikes:<8}")
+
+        if fin >= total:
+            break
+
+        while True:
+            continuar = input("\n¿Ver la siguiente página? (s/n): ").strip().lower()
+            if continuar in ("s", "n"):
+                break
+            print(COLORES["alerta"] + "⚠ Opción inválida. Responda 's' o 'n'." + COLORES["reset"])
+
+        if continuar == "n":
+            break
+
+        pagina += 1
+
+
 def menu_principal(usuario):
     while True:
         print(COLORES["bright"] + "\n════════ MENU PySGB ════════" + COLORES["reset"])
@@ -65,7 +115,8 @@ def menu_principal(usuario):
         print("5. Prestar libro 🔄")
         print("6. Devolver libro ↩️")
         print("7. Listar clientes bloqueados 🚫")
-        print("8. Salir 🚪")
+        print("8. Listar clientes 👥")
+        print("9. Salir 🚪")
 
         opcion = input("Seleccione una opción: ")
 
@@ -148,6 +199,11 @@ def menu_principal(usuario):
                     print(f"ID: {c['id']} | {c['nombre']} | Strikes: {c['strikes']} | Bloqueado hasta: {c['bloqueado_hasta']}")
 
         elif opcion == "8":
+            clientes = get_clients()
+            mostrar_clientes(clientes, "👥 Clientes Registrados")
+            log_event("list_clients", "INFO", "Clientes listados.", usuario=usuario)
+
+        elif opcion == "9":
             print(COLORES["rosa"] + "👋 Saliendo del sistema. ¡Hasta luego!" + COLORES["reset"])
             log_event("logout", "INFO", "Sesión cerrada.", usuario=usuario)
             break

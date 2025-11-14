@@ -45,3 +45,4 @@ fecha;gravedad;evento;usuario;funcion;mensaje;extra
 2025-11-13 21:24:44;INFO;login_success;misa;;Inicio de sesión exitoso.;
 2025-11-13 21:25:15;INFO;list_books;misa;;Libros disponibles listados.;
 2025-11-13 21:25:40;ERROR;lend_book_error;misa;;Cliente no encontrado.;
+2025-11-13 21:27:34;INFO;login_success;misa;;Inicio de sesión exitoso.;
