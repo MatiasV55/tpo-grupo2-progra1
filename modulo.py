@@ -222,3 +222,74 @@ def listar_bloqueados():
         save_clients(clients)
 
     return bloqueados
+
+
+def reporte_prestamos_por_genero_pais():
+    books = get_books()
+    clients = get_clients()
+    
+    clientes_dict = {c[1]: c[5] for c in clients if c[5]}
+    
+    matriz = {}
+    generos = set()
+    paises = set()
+    
+    for libro in books:
+        genero = libro[3] if libro[3] else "Sin género"
+        disponible = libro[8] == 'True' or libro[8] == ''
+        
+        generos.add(genero)
+        
+        if disponible:
+            pais = "Disponible"
+        else:
+            cliente_nombre = libro[9]
+            pais = clientes_dict.get(cliente_nombre, "Sin país")
+        
+        paises.add(pais)
+        
+        if pais not in matriz:
+            matriz[pais] = {}
+        if genero not in matriz[pais]:
+            matriz[pais][genero] = 0
+        matriz[pais][genero] += 1
+    
+    paises_ordenados = sorted([p for p in sorted(paises) if p != "Disponible"])
+    if "Disponible" in paises:
+        paises_ordenados.append("Disponible")
+    
+    return matriz, paises_ordenados, sorted(generos)
+
+
+def conteo_libros_por_autor():
+    books = get_books()
+    conteo = {}
+    
+    for libro in books:
+        autor = libro[2] if libro[2] else "Sin autor"
+        conteo[autor] = conteo.get(autor, 0) + 1
+    
+    return conteo
+
+
+def promedio_edad_por_ciudad():
+    clients = get_clients()
+    ciudades = {}
+    
+    for cliente in clients:
+        ciudad = cliente[4] if cliente[4] else "Sin ciudad"
+        edad_str = cliente[2]
+        
+        if edad_str and edad_str.isdigit():
+            edad = int(edad_str)
+            if ciudad not in ciudades:
+                ciudades[ciudad] = {"suma": 0, "cantidad": 0}
+            ciudades[ciudad]["suma"] += edad
+            ciudades[ciudad]["cantidad"] += 1
+    
+    promedios = {}
+    for ciudad, datos in ciudades.items():
+        if datos["cantidad"] > 0:
+            promedios[ciudad] = datos["suma"] / datos["cantidad"]
+    
+    return promedios

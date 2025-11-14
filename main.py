@@ -1,7 +1,8 @@
 from pass_logic import login, log_event, COLORES, limpiar_pantalla
 from modulo import (
     register_book, register_client, list_books,
-    lend_book, return_book, initialize_files, listar_bloqueados, get_clients
+    lend_book, return_book, initialize_files, listar_bloqueados, get_clients,
+    reporte_prestamos_por_genero_pais, conteo_libros_por_autor, promedio_edad_por_ciudad
 )
 
 
@@ -103,6 +104,54 @@ def mostrar_clientes(clients, titulo, page_size=PAGE_SIZE):
         pagina += 1
 
 
+def mostrar_reporte_paginado(datos, titulo, columna1, columna2, page_size=PAGE_SIZE):
+    total = len(datos)
+    print(COLORES["bright"] + f"\n{titulo} ({total}):" + COLORES["reset"])
+
+    if not datos:
+        print(COLORES["alerta"] + "No hay datos para mostrar." + COLORES["reset"])
+        return
+
+    pagina = 0
+    while True:
+        inicio = pagina * page_size
+        if inicio >= total:
+            print(COLORES["alerta"] + "No hay más datos para mostrar." + COLORES["reset"])
+            break
+
+        fin = min(inicio + page_size, total)
+        print(
+            COLORES["bright"]
+            + f"\n{titulo} {inicio + 1}-{fin} de {total}:"
+            + COLORES["reset"]
+        )
+
+        print(COLORES["bright"] + f"{columna1:<40} | {columna2:<15}" + COLORES["reset"])
+        print("-" * 60)
+
+        for item in datos[inicio:fin]:
+            clave, valor = item
+            clave_display = clave if len(clave) <= 40 else clave[:37] + "..."
+            if isinstance(valor, float):
+                print(f"{clave_display:<40} | {valor:.2f}")
+            else:
+                print(f"{clave_display:<40} | {valor:<15}")
+
+        if fin >= total:
+            break
+
+        while True:
+            continuar = input("\n¿Ver la siguiente página? (s/n): ").strip().lower()
+            if continuar in ("s", "n"):
+                break
+            print(COLORES["alerta"] + "⚠ Opción inválida. Responda 's' o 'n'." + COLORES["reset"])
+
+        if continuar == "n":
+            break
+
+        pagina += 1
+
+
 def menu_principal(usuario):
     while True:
         print(COLORES["bright"] + "\n════════ MENU PySGB ════════" + COLORES["reset"])
@@ -114,7 +163,8 @@ def menu_principal(usuario):
         print("6. Devolver libro ↩️")
         print("7. Listar clientes bloqueados 🚫")
         print("8. Listar clientes 👥")
-        print("9. Salir 🚪")
+        print("9. Reportes y estadísticas 📊")
+        print("10. Salir 🚪")
 
         opcion = input("Seleccione una opción: ")
 
@@ -202,6 +252,103 @@ def menu_principal(usuario):
             log_event("list_clients", "INFO", "Clientes listados.", usuario=usuario)
 
         elif opcion == "9":
+            print(COLORES["bright"] + "\n════════ REPORTES Y ESTADÍSTICAS ════════" + COLORES["reset"])
+            print("1. Reporte matricial: Préstamos por género y país 📊")
+            print("2. Conteo de libros por autor 📚")
+            print("3. Promedio de edad de usuarios por ciudad 👥")
+            print("4. Volver al menú principal ↩️")
+            
+            sub_opcion = input("Seleccione una opción: ")
+            
+            if sub_opcion == "1":
+                try:
+                    matriz, paises, generos = reporte_prestamos_por_genero_pais()
+                    
+                    if not paises or not generos:
+                        print(COLORES["alerta"] + "⚠ No hay datos suficientes para generar el reporte." + COLORES["reset"])
+                    else:
+                        print(COLORES["bright"] + "\n📊 REPORTE MATRICIAL: Libros por Género y País" + COLORES["reset"])
+                        print("=" * 80)
+                        
+                        ancho_columna = max(15, max(len(p) for p in paises) + 2)
+                        ancho_genero = max(15, max(len(g) for g in generos) + 2)
+                        
+                        header = f"{'País':<{ancho_columna}}"
+                        for genero in generos:
+                            header += f" | {genero:<{ancho_genero}}"
+                        header += " | Total"
+                        print(COLORES["bright"] + header + COLORES["reset"])
+                        print("-" * len(header))
+                        
+                        total_general = 0
+                        for pais in paises:
+                            fila = f"{pais:<{ancho_columna}}"
+                            total_fila = 0
+                            for genero in generos:
+                                cantidad = matriz.get(pais, {}).get(genero, 0)
+                                total_fila += cantidad
+                                fila += f" | {cantidad:<{ancho_genero}}"
+                            fila += f" | {total_fila}"
+                            print(fila)
+                            total_general += total_fila
+                        
+                        print("-" * len(header))
+                        total_fila = f"{'TOTAL':<{ancho_columna}}"
+                        for genero in generos:
+                            total_col = sum(matriz.get(p, {}).get(genero, 0) for p in paises)
+                            total_fila += f" | {total_col:<{ancho_genero}}"
+                        total_fila += f" | {total_general}"
+                        print(COLORES["bright"] + total_fila + COLORES["reset"])
+                        
+                        log_event("reporte_matricial", "INFO", "Reporte matricial generado.", usuario=usuario)
+                except Exception as e:
+                    print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                    log_event("reporte_matricial_error", "ERROR", str(e), usuario=usuario)
+            
+            elif sub_opcion == "2":
+                try:
+                    conteo = conteo_libros_por_autor()
+                    
+                    if not conteo:
+                        print(COLORES["alerta"] + "⚠ No hay libros registrados." + COLORES["reset"])
+                    else:
+                        ordenado = sorted(conteo.items(), key=lambda x: x[1], reverse=True)
+                        mostrar_reporte_paginado(
+                            ordenado,
+                            "📚 CONTEO DE LIBROS POR AUTOR",
+                            "Autor",
+                            "Cantidad"
+                        )
+                        log_event("conteo_autores", "INFO", "Conteo de libros por autor generado.", usuario=usuario)
+                except Exception as e:
+                    print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                    log_event("conteo_autores_error", "ERROR", str(e), usuario=usuario)
+            
+            elif sub_opcion == "3":
+                try:
+                    promedios = promedio_edad_por_ciudad()
+                    
+                    if not promedios:
+                        print(COLORES["alerta"] + "⚠ No hay datos suficientes para calcular promedios." + COLORES["reset"])
+                    else:
+                        ordenado = sorted(promedios.items(), key=lambda x: x[1], reverse=True)
+                        mostrar_reporte_paginado(
+                            ordenado,
+                            "👥 PROMEDIO DE EDAD DE USUARIOS POR CIUDAD",
+                            "Ciudad",
+                            "Promedio Edad"
+                        )
+                        log_event("promedio_edad_ciudad", "INFO", "Promedio de edad por ciudad generado.", usuario=usuario)
+                except Exception as e:
+                    print(COLORES["error"] + f"❌ Error: {e}" + COLORES["reset"])
+                    log_event("promedio_edad_ciudad_error", "ERROR", str(e), usuario=usuario)
+            
+            elif sub_opcion == "4":
+                continue
+            else:
+                print(COLORES["alerta"] + "⚠ Opción inválida." + COLORES["reset"])
+
+        elif opcion == "10":
             print(COLORES["rosa"] + "👋 Saliendo del sistema. ¡Hasta luego!" + COLORES["reset"])
             log_event("logout", "INFO", "Sesión cerrada.", usuario=usuario)
             break
