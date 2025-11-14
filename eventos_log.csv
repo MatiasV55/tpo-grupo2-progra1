@@ -29,3 +29,14 @@ fecha;gravedad;evento;usuario;funcion;mensaje;extra
 2025-11-13 20:15:03;ERROR;login_failed;;main;EOF when reading a line;
 2025-11-13 20:15:57;INFO;login_success;misa;;Inicio de sesión exitoso.;
 2025-11-13 20:16:02;INFO;list_books;misa;;Libros disponibles listados.;
+2025-11-13 20:45:03;INFO;list_books_borrowed;juli;;Libros prestados listados.;
+2025-11-13 20:45:18;ERROR;lend_book_error;juli;;Cliente no encontrado.;
+2025-11-13 20:45:41;INFO;register_client;juli;;Cliente 'Valentina' registrado.;
+2025-11-13 20:46:08;INFO;lend_book;juli;;Libro ID 14 prestado a Valentina.;
+2025-11-13 20:46:12;INFO;list_books_borrowed;juli;;Libros prestados listados.;
+2025-11-13 20:46:23;INFO;return_book;juli;;Libro ID 14 devuelto.;
+2025-11-13 21:00:46;INFO;login_success;juli;;Inicio de sesión exitoso.;
+2025-11-13 21:01:06;INFO;list_books;juli;;Libros disponibles listados.;
+2025-11-13 21:15:08;INFO;login_success;juli;;Inicio de sesión exitoso.;
+2025-11-13 21:15:28;INFO;list_books;juli;;Libros disponibles listados.;
+2025-11-13 21:17:38;INFO;logout;juli;;Sesión cerrada.;

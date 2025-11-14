@@ -12,7 +12,7 @@ id,titulo,autor,genero,anio_publicacion,editorial,idioma,paginas,disponible,clie
 11,Libro 11,Autor 945,Romance,2009,HarperCollins,Italiano,775,,,,
 12,Libro 12,Autor 229,Romance,2024,Planeta,Italiano,834,,,,
 13,Libro 13,Autor 3749,Ciencia,2005,HarperCollins,Italiano,568,,,,
-14,Libro 14,Autor 3931,Misterio,1953,Anagrama,Español,617,,,,
+14,Libro 14,Autor 3931,Misterio,1953,Anagrama,Español,617,True,,,
 15,Libro 15,Autor 4625,Fantasía,1967,Alfaguara,Español,516,,,,
 16,Libro 16,Autor 1225,No ficción,1978,Penguin,Alemán,188,,,,
 17,Libro 17,Autor 3887,Romance,1988,Salamandra,Español,620,,,,

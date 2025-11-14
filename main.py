@@ -5,14 +5,48 @@ from modulo import (
 )
 
 
-def mostrar_libros(books, titulo):
-    print(COLORES["bright"] + f"\n{titulo} ({len(books)}):" + COLORES["reset"])
+PAGE_SIZE = 25
+
+
+def mostrar_libros(books, titulo, page_size=PAGE_SIZE):
+    total = len(books)
+    print(COLORES["bright"] + f"\n{titulo} ({total}):" + COLORES["reset"])
+
     if not books:
         print(COLORES["alerta"] + "No hay libros en esta categoría." + COLORES["reset"])
-    else:
-        for b in books:
+        return
+
+    pagina = 0
+    while True:
+        inicio = pagina * page_size
+        if inicio >= total:
+            print(COLORES["alerta"] + "No hay más libros para mostrar." + COLORES["reset"])
+            break
+
+        fin = min(inicio + page_size, total)
+        print(
+            COLORES["bright"]
+            + f"\n{titulo} {inicio + 1}-{fin} de {total}:"
+            + COLORES["reset"]
+        )
+
+        for b in books[inicio:fin]:
             estado = "Disponible" if b[8] == 'True' else f"Prestado a {b[9]} el {b[10]}"
             print(f"ID: {b[0]} | {b[1]} ({b[2]}) → {estado}")
+
+        if fin >= total:
+            break
+
+        while True:
+            continuar = input("\n¿Ver la siguiente página? (s/n): ").strip().lower()
+            if continuar in ("s", "n"):
+                break
+            print(COLORES["alerta"] + "⚠ Opción inválida. Responda 's' o 'n'." + COLORES["reset"])
+
+        if continuar == "n":
+            break
+
+        pagina += 1
 
 
 def menu_principal(usuario):
